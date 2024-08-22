@@ -1,6 +1,16 @@
+
 import hashlib
 import os
 
+
+def UploadPartToMinio(fileContent, s3,bucket, PartId):
+    s3.put_object(
+        Bucket=bucket,
+        Key=PartId,
+        Body=fileContent,
+        ContentType='text/plain'
+    )
+    
 
     
 def GetFileProperties(filePath):

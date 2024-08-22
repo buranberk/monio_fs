@@ -1,12 +1,13 @@
-from helpers.file_utils import GetFileProperties, DivideFile
+from helpers.file_utils import GetFileProperties, DivideFile, UploadPartToMinio
 import os
 
-def HandleFile(FilePath, FilesCollection,PartsCollection,rootDirId=".",maxSizeBytes=100*1024*1024):
+def HandleFile(FilePath, FilesCollection,PartsCollection,s3=None,rootDirId=".",maxSizeBytes=100*1024*1024,bucket="monio"):
     #First get the properties of the file
     HashMd5, LineCount, FileSize = GetFileProperties(FilePath)
     FileName = os.path.basename(FilePath)
     #Dividing the file into parts
     Parts = DivideFile(FilePath,maxSizeBytes)
+    part_list = []
     # Add the file to the database
     FileId = FilesCollection.insert_one({
         "FileName": FileName,
@@ -36,4 +37,13 @@ def HandleFile(FilePath, FilesCollection,PartsCollection,rootDirId=".",maxSizeBy
             "SizeBytes": PartSize,
             "StartByte": StartByte
         }).inserted_id
+        part_list.append({"PartId":PartId.__str__(),"StartByte":StartByte,"SizeBytes":PartSize})
+    if s3 is not None:
+        with open(FilePath, 'rb') as infile:
+            for part in part_list:
+                infile.seek(part["StartByte"])
+                partContent = infile.read(part["SizeBytes"])
+                UploadPartToMinio(partContent,s3,bucket,part["PartId"])
+
+
     return FileId
