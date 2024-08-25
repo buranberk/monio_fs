@@ -46,11 +46,15 @@ if __name__ == "__main__":
     filesCollection = db["files"]
     partsCollection = db["parts"]
     # clear the database
+
     if args.clear:
         folderCollection.delete_many({})
         filesCollection.delete_many({})
         partsCollection.delete_many({})
-        s3.delete_objects(Bucket=args.bucket,Delete={"Objects":[{"Key":obj["Key"]} for obj in s3.list_objects(Bucket=args.bucket)["Contents"]]})
+        try:
+            s3.delete_objects(Bucket=args.bucket,Delete={"Objects":[{"Key":obj["Key"]} for obj in s3.list_objects(Bucket=args.bucket)["Contents"]]})
+        except:
+            pass
     # list buckets 
 
 
