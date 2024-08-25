@@ -4,17 +4,12 @@ import os
 def HandleFolder(folderPath,folderCollection,filesCollection,partsCollection,s3=None,rootDirId="root",recursive=False,bucket="monio"):
     # Check if the folder exists
     if not os.path.exists(folderPath):
-        return "Folder does not exist"
+        return Exception("Folder does not exist")
     
-    # inster the folder to the database
     rootId = folderCollection.insert_one({
         "folderPath": folderPath,
         "rootDir": rootDirId
     }).inserted_id
-    # Get the list of files and folders in the folder
-    # If recursive is true, get the list of all files and folders in the folder
-    # but not the subfolders
-    # Add the files and folders to the database
 
 
 
@@ -27,7 +22,7 @@ def HandleFolder(folderPath,folderCollection,filesCollection,partsCollection,s3=
     files = [f for f in os.listdir(folderPath) if os.path.isfile(os.path.join(folderPath, f))]
     for file in files:
         filePath = os.path.join(folderPath,file)
-        HandleFile(filePath,filesCollection,partsCollection,s3,rootId,bucket=bucket)
+        HandleFile(filePath,filesCollection,partsCollection,s3,bucket,rootId)
         
     return rootId
 
