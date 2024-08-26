@@ -6,19 +6,21 @@ def HandleFolder(folderPath,folderCollection,filesCollection,partsCollection,s3=
     if not os.path.exists(folderPath):
         return Exception("Folder does not exist")
     
+    # insert handled folder and get id
     rootId = folderCollection.insert_one({
         "folderPath": folderPath,
         "rootDir": rootDirId
     }).inserted_id
 
 
-
+    # Handle all the folders and files recursively
     if recursive:
         folders = [f for f in os.listdir(folderPath) if os.path.isdir(os.path.join(folderPath, f))]
         for folder in folders:
             HandleFolder(os.path.join(folderPath,folder),folderCollection,filesCollection,partsCollection,s3,rootId,True,bucket)
-    # get all the files in the folder and add them to the database
+    
 
+    # Add all the files in the folder to the database
     files = [f for f in os.listdir(folderPath) if os.path.isfile(os.path.join(folderPath, f))]
     for file in files:
         filePath = os.path.join(folderPath,file)

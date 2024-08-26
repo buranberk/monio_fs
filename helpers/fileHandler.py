@@ -19,12 +19,15 @@ def HandleFile(FilePath, FilesCollection,PartsCollection,s3=None,bucket=None,roo
     
     # Add the parts to the database
     for i in range(0,len(Parts)+1):
+        # if there are no parts set the whole file as a part
         if len(Parts) == 0:
             PartSize = FileSize
             StartByte = 0
+        # Handle last part
         elif i == len(Parts):
             PartSize = FileSize - Parts[i-1]
             StartByte = Parts[i-1]
+        # Handle last part
         elif i == 0:
             PartSize = Parts[i]
             StartByte = 0
@@ -38,6 +41,7 @@ def HandleFile(FilePath, FilesCollection,PartsCollection,s3=None,bucket=None,roo
             "StartByte": StartByte
         }).inserted_id
         part_list.append({"PartId":PartId.__str__(),"StartByte":StartByte,"SizeBytes":PartSize})
+    # Upload files to minio if it exists
     if s3 is not None and bucket is not None:
         with open(FilePath, 'rb') as infile:
             for part in part_list:
